@@ -1,0 +1,597 @@
+<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Redflake - स्थानीय संगीत प्लेयर</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            margin-top: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #ff7e5f, #feb47b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .tagline {
+            font-size: 1.2rem;
+            opacity: 0.8;
+        }
+        
+        .player-section {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .now-playing {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .song-info {
+            margin-bottom: 20px;
+        }
+        
+        .song-title {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+        
+        .song-artist {
+            font-size: 1rem;
+            opacity: 0.7;
+        }
+        
+        .album-art {
+            width: 200px;
+            height: 200px;
+            margin: 0 auto 20px;
+            border-radius: 10px;
+            background: linear-gradient(45deg, #ff7e5f, #feb47b);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .progress-container {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            margin: 20px 0;
+            cursor: pointer;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ff7e5f, #feb47b);
+            border-radius: 3px;
+            width: 0%;
+            transition: width 0.1s linear;
+        }
+        
+        .time-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            opacity: 0.7;
+            margin-bottom: 20px;
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .control-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+        
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.1);
+        }
+        
+        .play-btn {
+            width: 60px;
+            height: 60px;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, #ff7e5f, #feb47b);
+        }
+        
+        .play-btn:hover {
+            background: linear-gradient(135deg, #ff8a6a, #ffb88c);
+        }
+        
+        .volume-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .volume-slider {
+            width: 100px;
+            -webkit-appearance: none;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            outline: none;
+        }
+        
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: #ff7e5f;
+            cursor: pointer;
+        }
+        
+        .playlist-section {
+            margin-top: 30px;
+        }
+        
+        .playlist-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .playlist-title {
+            font-size: 1.3rem;
+        }
+        
+        .file-input-btn {
+            background: linear-gradient(135deg, #ff7e5f, #feb47b);
+            border: none;
+            border-radius: 30px;
+            padding: 10px 20px;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .file-input-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 126, 95, 0.4);
+        }
+        
+        #fileInput {
+            display: none;
+        }
+        
+        .playlist {
+            max-height: 300px;
+            overflow-y: auto;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 10px;
+        }
+        
+        .playlist-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 5px;
+        }
+        
+        .playlist-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .playlist-item.active {
+            background: rgba(255, 126, 95, 0.2);
+            border-left: 3px solid #ff7e5f;
+        }
+        
+        .playlist-item-number {
+            width: 30px;
+            text-align: center;
+            opacity: 0.7;
+        }
+        
+        .playlist-item-info {
+            flex: 1;
+        }
+        
+        .playlist-item-title {
+            font-weight: bold;
+        }
+        
+        .playlist-item-artist {
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+        
+        .playlist-item-duration {
+            opacity: 0.7;
+        }
+        
+        footer {
+            margin-top: 30px;
+            text-align: center;
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+        
+        /* स्क्रॉलबार स्टाइलिंग */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 126, 95, 0.5);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 126, 95, 0.7);
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .album-art {
+                width: 150px;
+                height: 150px;
+                font-size: 3rem;
+            }
+            
+            .controls {
+                gap: 10px;
+            }
+            
+            .control-btn {
+                width: 45px;
+                height: 45px;
+            }
+            
+            .play-btn {
+                width: 55px;
+                height: 55px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Redflake</h1>
+            <p class="tagline">आपका व्यक्तिगत संगीत अनुभव</p>
+        </header>
+        
+        <section class="player-section">
+            <div class="now-playing">
+                <div class="album-art">
+                    <span>♪</span>
+                </div>
+                <div class="song-info">
+                    <div class="song-title">कोई गाना चुनें</div>
+                    <div class="song-artist">संगीत फ़ाइलें जोड़ें</div>
+                </div>
+                
+                <div class="progress-container" id="progressContainer">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                
+                <div class="time-info">
+                    <span id="currentTime">0:00</span>
+                    <span id="duration">0:00</span>
+                </div>
+                
+                <div class="controls">
+                    <button class="control-btn" id="prevBtn">⏮</button>
+                    <button class="control-btn play-btn" id="playBtn">▶</button>
+                    <button class="control-btn" id="nextBtn">⏭</button>
+                </div>
+                
+                <div class="volume-control">
+                    <span>🔊</span>
+                    <input type="range" class="volume-slider" id="volumeSlider" min="0" max="100" value="70">
+                </div>
+            </div>
+        </section>
+        
+        <section class="playlist-section">
+            <div class="playlist-header">
+                <div class="playlist-title">आपकी प्लेलिस्ट</div>
+                <label for="fileInput" class="file-input-btn">फ़ाइलें जोड़ें</label>
+                <input type="file" id="fileInput" accept="audio/*" multiple>
+            </div>
+            
+            <div class="playlist" id="playlist">
+                <div class="playlist-item empty">
+                    <div class="playlist-item-info">
+                        <div class="playlist-item-title">कोई गाना नहीं</div>
+                        <div class="playlist-item-artist">ऊपर बटन से फ़ाइलें जोड़ें</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <footer>
+            Redflake - स्थानीय संगीत प्लेयर | आपका संगीत, आपके नियंत्रण में
+        </footer>
+    </div>
+
+    <script>
+        // ऑडियो एलिमेंट और वेरिएबल्स
+        const audio = new Audio();
+        let currentSongIndex = 0;
+        let songs = [];
+        let isPlaying = false;
+        
+        // DOM एलिमेंट्स
+        const playBtn = document.getElementById('playBtn');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const progressBar = document.getElementById('progressBar');
+        const progressContainer = document.getElementById('progressContainer');
+        const currentTimeEl = document.getElementById('currentTime');
+        const durationEl = document.getElementById('duration');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const fileInput = document.getElementById('fileInput');
+        const playlist = document.getElementById('playlist');
+        const songTitle = document.querySelector('.song-title');
+        const songArtist = document.querySelector('.song-artist');
+        
+        // ऑडियो इवेंट लिसनर्स
+        audio.addEventListener('loadedmetadata', () => {
+            durationEl.textContent = formatTime(audio.duration);
+            audio.volume = volumeSlider.value / 100;
+        });
+        
+        audio.addEventListener('timeupdate', () => {
+            const progressPercent = (audio.currentTime / audio.duration) * 100;
+            progressBar.style.width = `${progressPercent}%`;
+            currentTimeEl.textContent = formatTime(audio.currentTime);
+        });
+        
+        audio.addEventListener('ended', () => {
+            playNextSong();
+        });
+        
+        // प्रोग्रेस बार क्लिक करने पर समय बदलें
+        progressContainer.addEventListener('click', (e) => {
+            const width = progressContainer.clientWidth;
+            const clickX = e.offsetX;
+            const duration = audio.duration;
+            
+            audio.currentTime = (clickX / width) * duration;
+        });
+        
+        // प्ले/पॉज़ बटन
+        playBtn.addEventListener('click', () => {
+            if (songs.length === 0) return;
+            
+            if (isPlaying) {
+                pauseSong();
+            } else {
+                playSong();
+            }
+        });
+        
+        // अगला गाना
+        nextBtn.addEventListener('click', playNextSong);
+        
+        // पिछला गाना
+        prevBtn.addEventListener('click', playPrevSong);
+        
+        // वॉल्यूम नियंत्रण
+        volumeSlider.addEventListener('input', () => {
+            audio.volume = volumeSlider.value / 100;
+        });
+        
+        // फ़ाइल इनपुट
+        fileInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            
+            files.forEach(file => {
+                if (file.type.startsWith('audio/')) {
+                    const url = URL.createObjectURL(file);
+                    songs.push({
+                        title: file.name.replace(/\.[^/.]+$/, ""), // एक्सटेंशन हटाएं
+                        artist: 'अज्ञात कलाकार',
+                        src: url,
+                        file: file
+                    });
+                }
+            });
+            
+            updatePlaylist();
+            
+            // अगर कोई गाना नहीं बज रहा है तो पहला गाना चलाएं
+            if (songs.length > 0 && !isPlaying) {
+                currentSongIndex = 0;
+                loadSong(currentSongIndex);
+            }
+        });
+        
+        // गाना लोड करें
+        function loadSong(index) {
+            if (songs.length === 0) return;
+            
+            const song = songs[index];
+            audio.src = song.src;
+            songTitle.textContent = song.title;
+            songArtist.textContent = song.artist;
+            
+            updatePlaylist();
+        }
+        
+        // गाना चलाएं
+        function playSong() {
+            if (songs.length === 0) return;
+            
+            if (audio.src === '') {
+                loadSong(currentSongIndex);
+            }
+            
+            audio.play();
+            isPlaying = true;
+            playBtn.innerHTML = '⏸';
+        }
+        
+        // गाना रोकें
+        function pauseSong() {
+            audio.pause();
+            isPlaying = false;
+            playBtn.innerHTML = '▶';
+        }
+        
+        // अगला गाना चलाएं
+        function playNextSong() {
+            if (songs.length === 0) return;
+            
+            currentSongIndex++;
+            if (currentSongIndex >= songs.length) {
+                currentSongIndex = 0;
+            }
+            
+            loadSong(currentSongIndex);
+            if (isPlaying) {
+                audio.play();
+            }
+        }
+        
+        // पिछला गाना चलाएं
+        function playPrevSong() {
+            if (songs.length === 0) return;
+            
+            currentSongIndex--;
+            if (currentSongIndex < 0) {
+                currentSongIndex = songs.length - 1;
+            }
+            
+            loadSong(currentSongIndex);
+            if (isPlaying) {
+                audio.play();
+            }
+        }
+        
+        // प्लेलिस्ट अपडेट करें
+        function updatePlaylist() {
+            if (songs.length === 0) {
+                playlist.innerHTML = `
+                    <div class="playlist-item empty">
+                        <div class="playlist-item-info">
+                            <div class="playlist-item-title">कोई गाना नहीं</div>
+                            <div class="playlist-item-artist">ऊपर बटन से फ़ाइलें जोड़ें</div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            playlist.innerHTML = '';
+            
+            songs.forEach((song, index) => {
+                const playlistItem = document.createElement('div');
+                playlistItem.className = `playlist-item ${index === currentSongIndex ? 'active' : ''}`;
+                playlistItem.innerHTML = `
+                    <div class="playlist-item-number">${index + 1}</div>
+                    <div class="playlist-item-info">
+                        <div class="playlist-item-title">${song.title}</div>
+                        <div class="playlist-item-artist">${song.artist}</div>
+                    </div>
+                    <div class="playlist-item-duration">-:--</div>
+                `;
+                
+                playlistItem.addEventListener('click', () => {
+                    currentSongIndex = index;
+                    loadSong(currentSongIndex);
+                    if (isPlaying) {
+                        audio.play();
+                    } else {
+                        playSong();
+                    }
+                });
+                
+                playlist.appendChild(playlistItem);
+            });
+        }
+        
+        // समय को मिनट:सेकंड फॉर्मेट में बदलें
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return '0:00';
+            
+            const min = Math.floor(seconds / 60);
+            const sec = Math.floor(seconds % 60);
+            return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+        }
+        
+        // शुरुआती सेटअप
+        updatePlaylist();
+    </script>
+</body>
+</html>
+
+
