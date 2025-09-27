@@ -9,7 +9,8 @@
 🌐 किसी सर्वर की आवश्यकता नहीं - यह पूरी तरह से आपके ब्राउज़र में चलता है।
 🚀 कैसे उपयोग करें
 स्थानीय रूप से (Locally)
-इस रिपॉजिटरी को क्लोन करें: git clone https://github.com/your-username/redflake-music-player.git
+इस रिपॉजिटरी को क्लोन करें: git clone https://github.com/urnikhil4-coder
+/redflake-music-player.git
 प्रोजेक्ट डायरेक्टरी में जाएं।
 index.html फ़ाइल को अपने वेब ब्राउज़र में खोलें।
 GitHub Pages पर डिप्लॉय करना
