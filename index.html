@@ -1,9 +1,26 @@
-<meta name='viewport' content='width=device-width, initial-scale=1'/><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="hi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Redflake - स्थानीय संगीत प्लेयर</title>
+    
+    <!-- PWA के लिए नई लाइनें -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#16213e">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').then(registration => {
+                    console.log('ServiceWorker registration successful');
+                }, err => {
+                    console.log('ServiceWorker registration failed: ', err);
+                });
+            });
+        }
+    </script>
+    <!-- PWA के लिए लाइनें खत्म -->
+
     <style>
         * {
             margin: 0;
